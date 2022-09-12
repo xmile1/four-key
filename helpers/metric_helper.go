@@ -20,14 +20,18 @@ func GetLeadTime(metricTags []tagMetricData) []tagMetricData {
 
 func GetMeanTimeToRestore(metricTags []tagMetricData) []tagMetricData {
 
-	for i := 0; i < len(metricTags); i++ {
+	for i := len(metricTags) - 1; i >= 0; i-- {
+
+		// tagMeanTimeRestoreAverageSeconds: How long does it take the longest fix to get to production after a release, because the tickets are worked on in series
 		if metricTags[i].fixCommits != nil {
 			var tagMeanTimeToRestore float64
 			for k := 0; k < len(metricTags[i].fixCommits); k++ {
-				tagMeanTimeToRestore += metricTags[i].fixCommits[k].Committer.When.Sub(metricTags[i].tagDate).Seconds()
+				time := metricTags[i].fixCommits[k].Committer.When.Sub(metricTags[i].tagDate).Seconds()
+				if time > tagMeanTimeToRestore {
+					tagMeanTimeToRestore = time
+				}
 			}
-			var average = (tagMeanTimeToRestore) / float64(len(metricTags[i].fixCommits))
-			metricTags[i].tagMeanTimeRestoreAverageSeconds = average
+			metricTags[i].tagMeanTimeRestoreAverageSeconds = tagMeanTimeToRestore
 		}
 	}
 
@@ -55,22 +59,11 @@ func GetChangeFailPercentage(metricTags []tagMetricData) []tagMetricData {
 }
 
 func GetChangeFailPercentageByReleases(metricTags []tagMetricData) []tagMetricData {
-
-	var totalReleaseCount = 0
-	var noOfReleasesWithFix = 0
-	for i := 0; i < len(metricTags); i++ {
-
+	for i := len(metricTags) - 1; i >= 0; i-- {
 		if len(metricTags[i].fixCommits) > 0 {
-			noOfReleasesWithFix = 1
-		}
-		if metricTags[i].releaseCommits != nil {
-			totalReleaseCount += len(metricTags[i].releaseCommits)
-		}
-
-		if totalReleaseCount != 0 {
-			metricTags[i].tagChangeFailPercentage = float64(noOfReleasesWithFix) * 100
-			totalReleaseCount = 0
-			noOfReleasesWithFix = 0
+			metricTags[i].tagChangeFailPercentage = 100
+		} else {
+			metricTags[i].tagChangeFailPercentage = 0
 		}
 	}
 
