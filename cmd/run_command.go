@@ -136,10 +136,11 @@ func onRun(cmd *cobra.Command, args []string) {
 
 	for _, repo := range repositories {
 		metricsRequest := MetricsRequest{
-			StartDate:         startDate,
-			EndDate:           endDate,
-			ReleaseTagPattern: repo.Configurations.ReleaseTagPattern,
-			FixPatterns:       repo.Configurations.FixCommitPatterns,
+			StartDate:                   startDate,
+			EndDate:                     endDate,
+			ReleaseTagPattern:           repo.Configurations.ReleaseTagPattern,
+			FixPatterns:                 repo.Configurations.FixCommitPatterns,
+			UseReleaseForFailPercentage: repo.Configurations.UseReleaseForFailPercentage,
 		}
 
 		metricsDto, err := CalculateMetrics(repo.Repository, metricsRequest)

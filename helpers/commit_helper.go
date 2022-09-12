@@ -1,12 +1,13 @@
 package helpers
 
 import (
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
-	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"regexp"
 	"strings"
 	"time"
+
+	"gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/plumbing"
+	"gopkg.in/src-d/go-git.v4/plumbing/object"
 )
 
 func GetTagFixAndFeatureCommits(fixPatterns []string, tagDateRangeTotalCommits []object.Commit, tagCommits []tagCommit) (metricTags []tagMetricData) {
@@ -14,6 +15,7 @@ func GetTagFixAndFeatureCommits(fixPatterns []string, tagDateRangeTotalCommits [
 	for i := 0; i < len(tagCommits); i++ {
 		var featureCommits []object.Commit
 		var fixCommits []object.Commit
+		var releaseCommits []object.Commit
 		var tagTotalCommits []object.Commit
 
 		if tagCommits[i].isDateRange {
@@ -38,12 +40,15 @@ func GetTagFixAndFeatureCommits(fixPatterns []string, tagDateRangeTotalCommits [
 				fixCommits = FetchFixCommitsInDateRange(fixPatterns, tagDateRangeTotalCommits, startDate, baseDate)
 			}
 
+			releaseCommits = FetchReleaseCommits(featureCommits)
+
 			tagMetricData := tagMetricData{
-				tagDate:      tagCommits[i].tagDate,
-				tag:          tagCommits[i].tag,
-				fixCommits:   fixCommits,
-				featCommits:  featureCommits,
-				totalCommits: tagTotalCommits,
+				tagDate:        tagCommits[i].tagDate,
+				tag:            tagCommits[i].tag,
+				fixCommits:     fixCommits,
+				featCommits:    featureCommits,
+				releaseCommits: releaseCommits,
+				totalCommits:   tagTotalCommits,
 			}
 
 			metricTags = append(metricTags, tagMetricData)
@@ -85,6 +90,18 @@ func FetchFeatureLastCommitsInDateRange(fixPatterns []string, tagDateRangeTotalC
 	}
 
 	return featureCommits
+}
+
+func FetchReleaseCommits(featureCommits []object.Commit) (releaseCommits []object.Commit) {
+	for i := 0; i < len(featureCommits); i++ {
+		// FIXME: hardcoded release commit pattern
+		if strings.HasPrefix(featureCommits[i].Message, "chore(release)") {
+			releaseCommits = append(releaseCommits, featureCommits[i])
+
+		}
+	}
+
+	return releaseCommits
 }
 
 func FetchFixFirstsCommitsInDateRange(fixPatterns []string, tagDateRangeTotalCommits []object.Commit, endDate time.Time) (fixCommits []object.Commit) {

@@ -41,10 +41,11 @@ type Settings struct {
 }
 
 type Repository struct {
-	CloneAddress      string   `json:"cloneAddress"`
-	TeamName          string   `json:"teamName"`
-	ReleaseTagPattern string   `json:"releaseTagPattern"`
-	FixCommitPatterns []string `json:"fixCommitPatterns"`
+	CloneAddress                string   `json:"cloneAddress"`
+	TeamName                    string   `json:"teamName"`
+	ReleaseTagPattern           string   `json:"releaseTagPattern"`
+	FixCommitPatterns           []string `json:"fixCommitPatterns"`
+	UseReleaseForFailPercentage bool     `json:"useReleaseForFailPercentage"`
 }
 
 func (r *Repository) Name() string {

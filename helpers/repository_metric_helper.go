@@ -4,13 +4,14 @@ import (
 	_ "container/list"
 	"errors"
 	. "four-key/models"
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
-	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"regexp"
 	_ "sort"
 	"strings"
 	"time"
+
+	"gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/plumbing"
+	"gopkg.in/src-d/go-git.v4/plumbing/object"
 )
 
 type tagCommit struct {
@@ -32,6 +33,7 @@ type FourKeyMetricsDto struct {
 type tagMetricData struct {
 	fixCommits                       []object.Commit
 	featCommits                      []object.Commit
+	releaseCommits                   []object.Commit
 	totalCommits                     []object.Commit
 	tag                              *plumbing.Reference
 	tagDate                          time.Time
@@ -74,7 +76,11 @@ func CalculateMetrics(repo *git.Repository, request MetricsRequest) (FourKeyMetr
 		tagFixAndFeatureCommits = GetMeanTimeToRestore(tagFixAndFeatureCommits)
 
 		//added ChangeFailPercentage
-		tagFixAndFeatureCommits = GetChangeFailPercentage(tagFixAndFeatureCommits)
+		if request.UseReleaseForFailPercentage {
+			tagFixAndFeatureCommits = GetChangeFailPercentageByReleases(tagFixAndFeatureCommits)
+		} else {
+			tagFixAndFeatureCommits = GetChangeFailPercentage(tagFixAndFeatureCommits)
+		}
 
 		//added LeadTime
 		tagFixAndFeatureCommits = GetLeadTime(tagFixAndFeatureCommits)

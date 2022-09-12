@@ -53,3 +53,26 @@ func GetChangeFailPercentage(metricTags []tagMetricData) []tagMetricData {
 
 	return metricTags
 }
+
+func GetChangeFailPercentageByReleases(metricTags []tagMetricData) []tagMetricData {
+
+	var totalReleaseCount = 0
+	var noOfReleasesWithFix = 0
+	for i := 0; i < len(metricTags); i++ {
+
+		if len(metricTags[i].fixCommits) > 0 {
+			noOfReleasesWithFix = 1
+		}
+		if metricTags[i].releaseCommits != nil {
+			totalReleaseCount += len(metricTags[i].releaseCommits)
+		}
+
+		if totalReleaseCount != 0 {
+			metricTags[i].tagChangeFailPercentage = float64(noOfReleasesWithFix) * 100
+			totalReleaseCount = 0
+			noOfReleasesWithFix = 0
+		}
+	}
+
+	return metricTags
+}

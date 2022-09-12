@@ -3,8 +3,9 @@ package models
 import "time"
 
 type MetricsRequest struct {
-	StartDate         time.Time
-	EndDate           time.Time
-	ReleaseTagPattern string
-	FixPatterns       []string
+	StartDate                   time.Time
+	EndDate                     time.Time
+	ReleaseTagPattern           string
+	FixPatterns                 []string
+	UseReleaseForFailPercentage bool
 }
